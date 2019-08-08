@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-//@RequestMapping("/api")
+@RequestMapping("/api")
 @Api(value="GitHubEvent", description="Operations to Add Update Delete and view Event inforamtion ")
 public class GithubApiRestController {
     
@@ -46,7 +46,7 @@ public class GithubApiRestController {
        return eventRepository.save(event);
         
     }
-   
+
     @RequestMapping(value = "/events/actors/{id}", 
             method = RequestMethod.GET, 
             produces = { MediaType.APPLICATION_JSON_VALUE})
@@ -55,7 +55,7 @@ public class GithubApiRestController {
         
         return actorRepository.findOne(id);
     }
-     @RequestMapping(value = "/actors", 
+     @RequestMapping(value = "/url",
             method = RequestMethod.PUT, 
             produces = { MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody

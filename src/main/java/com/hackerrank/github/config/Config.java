@@ -14,12 +14,19 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
+import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger.web.SecurityConfiguration;
+import springfox.documentation.swagger.web.SecurityConfigurationBuilder;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static springfox.documentation.builders.PathSelectors.regex;
 
@@ -37,8 +44,10 @@ public class Config extends WebMvcConfigurationSupport {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.hackerrank.github"))
-                .paths(regex("/api.*"))
+                .paths(PathSelectors.any())
                 .build()
+                .securitySchemes(Collections.singletonList(securitySchema()))
+                .securityContexts(Collections.singletonList(securityContext()))
                 .apiInfo(metaData());
     }
     private ApiInfo metaData() {
@@ -58,5 +67,41 @@ public class Config extends WebMvcConfigurationSupport {
 
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
+
+
+    List<SecurityReference> defaultAuth() {
+        AuthorizationScope[] authorizationScopes = new AuthorizationScope[3];
+        authorizationScopes[0] = new AuthorizationScope("openid", "open_connect");
+        authorizationScopes[1] = new AuthorizationScope("profile", "user_profile");
+        authorizationScopes[2] = new AuthorizationScope("api", "for_api");;
+        return Collections.singletonList(new SecurityReference("oauth2", authorizationScopes));
+    }
+
+    private ApiInfo metadata() {
+        return new ApiInfoBuilder().title("Swagger API Documentation")
+                .description("API documentation for  REST Services.").version("1.6.9").build();
+    }
+
+    private OAuth securitySchema() {
+        List<AuthorizationScope> authorizationScopes=new ArrayList<>();
+        authorizationScopes.add( new AuthorizationScope("openid", "open_connect"));
+        authorizationScopes.add( new AuthorizationScope("profile", "user_profile"));
+        authorizationScopes.add( new AuthorizationScope("api", "for_api"));
+        List<GrantType> grantTypes=new ArrayList<>();
+        GrantType grantType=new ImplicitGrant(new LoginEndpoint("http://localhost:8080/oauth/authorize"),"clientapp");
+       grantTypes.add(grantType);
+        return new OAuth("OAuth2",authorizationScopes,grantTypes);
+
+    }
+    private ApiKey apiKey(){
+        return new ApiKey("Authorization", "Authorization", "header");
+    }
+
+    private SecurityContext securityContext() {
+        return SecurityContext.builder()
+                .securityReferences(defaultAuth())
+                .forPaths(PathSelectors.any())
+                .build();
     }
 }
