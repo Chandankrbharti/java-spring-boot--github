@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.hackerrank.github.mis.FeignClientTest;
 import com.hackerrank.github.model.Actor;
 import com.hackerrank.github.model.Event;
 import com.hackerrank.github.repository.ActorRepository;
@@ -38,11 +39,13 @@ public class GithubApiRestController {
     ActorRepository actorRepository;
     @Autowired
     RepoRepository repoRepository;
-
+    @Autowired
+    FeignClientTest feignClientTest;
     @ApiOperation(value = "Add a EVENT")
     @RequestMapping(method = RequestMethod.POST,  produces = MediaType.APPLICATION_JSON_VALUE, value="/events" )
    public Event  eventsCreate(@Valid @RequestBody Event event){
-       
+        String s=feignClientTest.greet();
+        System.out.println(s);
        return eventRepository.save(event);
         
     }
